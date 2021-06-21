@@ -178,7 +178,17 @@ namespace weatherbit {
         let inchesOfRain = ((numRainDumps * 11) / 1000)
         return inchesOfRain
     }
-
+	
+    /**
+    * Reads the number of times the rain gauge has filled and emptied
+	* Returns the raw number of bucket dumps. 
+    */
+    //% weight=35 blockId="weatherbit_rainRaw" block="rainRaw"
+    export function rainRaw(): number {
+	startRainMonitoring();
+        return numRainDumps
+    }
+	
     /**
     * Sets up an event on pin 2 pulse high and event handler to increment rain
     * numRainDumps on said event.
