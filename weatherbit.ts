@@ -184,7 +184,7 @@ namespace weatherbit {
     * Reads the number of times the rain gauge has filled and emptied
 	* Returns the raw number of bucket dumps. 
     */
-    //% weight=30 blockId="weatherbit_rainRaw" block="rainRaw"
+    //% weight=30 blockId="weatherbit_rainRaw" block="rain raw"
     export function rainRaw(): number {
 	startRainMonitoring();
         return numRainDumps
@@ -262,8 +262,10 @@ namespace weatherbit {
     * Reads the number of times the wind gauge has turned
 	* Returns the raw number of turns 
     */
-    //% weight=21 blockId="weatherbit_windTurnsRaw" block="windTurnsRaw"
+    //% weight=21 blockId="weatherbit_windTurnsRaw" block="wind turns raw"
     export function windTurnsRaw(): number {
+        startWindMonitoring();
+	
         return numWindTurns
     }
 	
