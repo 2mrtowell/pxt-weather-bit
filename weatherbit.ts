@@ -28,6 +28,7 @@ namespace weatherbit {
     // Keep Track of weather monitoring variables
     let numRainDumps = 0
     let numWindTurns = 0
+    let numWindTurnsLast = 0
     let windMPH = 0
 
     // BME280 Addresses
@@ -256,7 +257,16 @@ namespace weatherbit {
 
         return windMPH
     }
-
+	
+/**
+    * Reads the number of times the wind gauge has turned
+	* Returns the raw number of turns 
+    */
+    //% weight=22 blockId="weatherbit_windTurnsRaw" block="windTurnsRaw"
+    export function windTurnsRaw(): number {
+        return numWindTurns
+    }
+	
     /**
     * Sets up an event on pin 8 pulse high and event handler to increment
     * numWindTurns on said event.  Starts background service to reset
@@ -285,8 +295,9 @@ namespace weatherbit {
         control.inBackground(() => {
             while (true) {
                 basic.pause(2000)
-                windMPH = (numWindTurns / 2) / (1492 / 1000)
-                numWindTurns = 0
+		if (numWindTurns >= numWindTurnsLast) // take care with wrap-around
+                    windMPH = ((numWindTurns - numWindTurnsLast) / 2) / (1492 / 1000)
+                numWindTurnsLast = numWindTurns
             }
         })
 
