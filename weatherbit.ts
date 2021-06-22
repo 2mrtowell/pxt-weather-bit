@@ -172,7 +172,7 @@ namespace weatherbit {
     * Reads the number of times the rain gauge has filled and emptied
 	* Returns inches of rain. 
     */
-    //% weight=30 blockId="weatherbit_rain" block="rain"
+    //% weight=31 blockId="weatherbit_rain" block="rain"
     export function rain(): number {
         startRainMonitoring();
         // Will be zero until numRainDumps is greater than 90 = 1"
@@ -184,7 +184,7 @@ namespace weatherbit {
     * Reads the number of times the rain gauge has filled and emptied
 	* Returns the raw number of bucket dumps. 
     */
-    //% weight=35 blockId="weatherbit_rainRaw" block="rainRaw"
+    //% weight=30 blockId="weatherbit_rainRaw" block="rainRaw"
     export function rainRaw(): number {
 	startRainMonitoring();
         return numRainDumps
@@ -194,7 +194,7 @@ namespace weatherbit {
     * Sets up an event on pin 2 pulse high and event handler to increment rain
     * numRainDumps on said event.
     */
-    //% weight=31 blockGap=8  blockId="weatherbit_startRainMonitoring" block="start rain monitoring"
+    //% weight=32 blockGap=8  blockId="weatherbit_startRainMonitoring" block="start rain monitoring"
     export function startRainMonitoring(): void {
         if (rainMonitorStarted) return;
 
@@ -251,7 +251,7 @@ namespace weatherbit {
     * Read the instaneous wind speed form the Anemometer. Starting the wind
     * speed monitoring updates the wind in MPH every 2 seconds.
     */
-    //% weight=21 blockGap=8 blockId="weatherbit_windSpeed" block="wind speed"
+    //% weight=22 blockGap=8 blockId="weatherbit_windSpeed" block="wind speed"
     export function windSpeed(): number {
         startWindMonitoring();
 
@@ -262,7 +262,7 @@ namespace weatherbit {
     * Reads the number of times the wind gauge has turned
 	* Returns the raw number of turns 
     */
-    //% weight=22 blockId="weatherbit_windTurnsRaw" block="windTurnsRaw"
+    //% weight=21 blockId="weatherbit_windTurnsRaw" block="windTurnsRaw"
     export function windTurnsRaw(): number {
         return numWindTurns
     }
@@ -272,7 +272,7 @@ namespace weatherbit {
     * numWindTurns on said event.  Starts background service to reset
     * numWindTurns every 2 seconds and calculate MPH.
     */
-    //% weight=22 blockGap=8 blockId="weatherbit_startWindMonitoring" block="start wind monitoring"
+    //% weight=23 blockGap=8 blockId="weatherbit_startWindMonitoring" block="start wind monitoring"
     export function startWindMonitoring(): void {
         if (windMonitorStarted) return;
 
