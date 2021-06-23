@@ -16,15 +16,21 @@ input.onButtonPressed(Button.A, () => {
     serial.writeValue("altitude", weatherbit.altitude())
 })
 input.onButtonPressed(Button.B, () => {
+    let dirIndex = weatherbit.windDirectionIndex()
     basic.showNumber(weatherbit.windSpeed())
     serial.writeValue("wind speed", weatherbit.windSpeed())
-    basic.showString(weatherbit.windDirection())
+    basic.showNumber(dirIndex)
+    basic.showString(weatherbit.directionStringName(dirIndex))
+    basic.showArrow(weatherbit.directionImageName(dirIndex))
     basic.pause(300)
     // serial.writeValue("wind direction",
     // weatherbit.readWindDirection())
     basic.showNumber(weatherbit.rain())
     serial.writeValue("rain", weatherbit.rain())
     basic.showNumber(weatherbit.rainRate())
+})
+input.onLogoEvent(TouchButtonEvent.Pressed, () => {
+    basic.showArrow(weatherbit.directionImageName(0))
 })
 weatherbit.startRainMonitoring()
 weatherbit.startWindMonitoring()
