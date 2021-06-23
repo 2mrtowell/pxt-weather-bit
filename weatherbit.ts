@@ -426,7 +426,7 @@ namespace weatherbit {
     let tFine = 0
 
     /**
-     * Returns temperature in DegC, resolution is 0.01 DegC. Output value of “5123” equals 51.23 DegC.
+     * Returns temperature in DegC, resolution is 0.01 DegC. Output value of "5123" equals 51.23 DegC.
      * tFine carries fine temperature as global value
      */
     function compensateTemp(tempRegVal: number): number {
@@ -438,7 +438,7 @@ namespace weatherbit {
 
     /**
      * Returns humidity in %RH as unsigned 32 bit integer in Q22.10 format (22 integer and 10 fractional bits).
-     * Output value of “47445” represents 47445/1024 = 46.333 %RH
+     * Output value of "47445" represents 47445/1024 = 46.333 %RH
      */
     function compensateHumidity(humRegValue: number): number {
         let hum: number = (tFine - 76800)

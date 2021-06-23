@@ -4,7 +4,8 @@
     "description": "littlebriars weatherbit",
     "license": "MIT",
     "dependencies": {
-        "core": "*"
+        "core": "*",
+        "microphone": "*"
     },
     "files": [
         "README.md",
@@ -12,10 +13,16 @@
         "shims.d.ts",
         "enums.d.ts",
         "_locales/fr/weatherbit-strings.json",
-        "_locales/fr/weatherbit-jsdoc-strings.json"
+        "_locales/fr/weatherbit-jsdoc-strings.json",
+        "main.py",
+        "main.ts"
     ],
     "testFiles": [
         "tests.ts"
     ],
-    "public": true
+    "public": true,
+    "supportedTargets": [
+        "microbit"
+    ],
+    "preferredEditor": "tsprj"
 }
