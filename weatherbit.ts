@@ -189,7 +189,12 @@ namespace weatherbit {
     //% weight=35 blockId="weatherbit_rainRate" block="rain rate"
     export function rainRate(): number {
 	startRainMonitoring();
-        return 2794 * 3600 / msRainDump
+	if (msRainDump == 0)
+	    return 0
+	else if (control.millis() - msRainDumpLast > msRainDump) // rate estimate decays over time if no more dumps when rain stops
+            return 2794 * 3600 / (control.millis() - msRainDumpLast)
+	else
+            return 2794 * 3600 / msRainDump
     }
 	
     /**
