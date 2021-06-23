@@ -24,7 +24,10 @@ input.onButtonPressed(Button.B, () => {
     // weatherbit.readWindDirection())
     basic.showNumber(weatherbit.rain())
     serial.writeValue("rain", weatherbit.rain())
+    basic.showNumber(weatherbit.rainRate())
 })
 weatherbit.startRainMonitoring()
 weatherbit.startWindMonitoring()
 weatherbit.startWeatherMonitoring()
+
+weatherbit.simWindAndRain()

@@ -27,8 +27,12 @@ namespace weatherbit {
     let weatherMonitorStarted = false;
     // Keep Track of weather monitoring variables
     let numRainDumps = 0
+    let msRainDump = 0
+    let msRainDumpLast = 0
     let numWindTurns = 0
     let numWindTurnsLast = 0
+    let msWindTurn = 0
+    let msWindTurnLast = 0
     let windMPH = 0
 
     // BME280 Addresses
@@ -170,24 +174,22 @@ namespace weatherbit {
 
     /**
     * Reads the number of times the rain gauge has filled and emptied
-	* Returns inches of rain. 
+	* Returns 0.1mm of rain. 
     */
     //% weight=34 blockId="weatherbit_rain" block="rain"
     export function rain(): number {
         startRainMonitoring();
-        // Will be zero until numRainDumps is greater than 90 = 1"
-        let inchesOfRain = ((numRainDumps * 11) / 1000)
-        return inchesOfRain
+        let tenthsOfMmOfRain = ((numRainDumps * 2794) / 1000)
+        return tenthsOfMmOfRain
     }
 	
     /**
-    * Reads the number of times the rain gauge has filled and emptied
-	* Returns the raw number of bucket dumps. 
+	* Returns the rate of rainfall in 0.1mm/hour based on the last time to fill the bucket
     */
-    //% weight=35 blockId="weatherbit_rainRaw" block="rain raw"
-    export function rainRaw(): number {
+    //% weight=35 blockId="weatherbit_rainRate" block="rain rate"
+    export function rainRate(): number {
 	startRainMonitoring();
-        return numRainDumps
+        return 2794 * 3600 / msRainDump
     }
 	
     /**
@@ -211,6 +213,8 @@ namespace weatherbit {
         // Register event handler for a pin 2 high pulse
         control.onEvent(EventBusSource.MICROBIT_ID_IO_P2, EventBusValue.MICROBIT_PIN_EVT_RISE, () => {
             numRainDumps++
+            msRainDump = control.millis() - msRainDumpLast
+            msRainDumpLast = control.millis()
         })
 
         // only init once
@@ -259,14 +263,27 @@ namespace weatherbit {
     }
 	
 /**
-    * Reads the number of times the wind gauge has turned
-	* Returns the raw number of turns 
+    * Simulate wind turns
     */
-    //% weight=21 blockId="weatherbit_windTurnsRaw" block="wind turns raw"
-    export function windTurnsRaw(): number {
-        startWindMonitoring();
+    //% weight=0 blockId="weatherbit_simWindTurns" block="simulate wind turns"
+    export function simWindAndRain(): void {
+        control.inBackground(() => {
+            let i = 0
+            while (true){
+                basic.pause(200)
+                numWindTurns++
+                msWindTurn = control.millis()
+                i++
+                if (i > 9){
+                    numRainDumps++
+                    msRainDump = control.millis() - msRainDumpLast
+                    msRainDumpLast = control.millis()
+                    i = 0
+                }
+            }
+        })
 	
-        return numWindTurns
+        return
     }
 	
     /**
@@ -291,15 +308,21 @@ namespace weatherbit {
         // Register event handler for a pin 8 high pulse
         control.onEvent(EventBusSource.MICROBIT_ID_IO_P8, EventBusValue.MICROBIT_PIN_EVT_RISE, () => {
             numWindTurns++
+            msWindTurn = control.millis()
         })
 
         // Update MPH value every 2 seconds
         control.inBackground(() => {
             while (true) {
                 basic.pause(2000)
-		if (numWindTurns >= numWindTurnsLast) // take care with wrap-around
-                    windMPH = ((numWindTurns - numWindTurnsLast) / 2) / (1492 / 1000)
+		        if ((numWindTurns >= numWindTurnsLast) && (msWindTurn > msWindTurnLast)) // take care with wrap-around
+                    windMPH = (1000 * (numWindTurns - numWindTurnsLast) / (msWindTurn - msWindTurnLast)) / (1492 / 1000)
+                else if (numWindTurns == numWindTurnsLast)
+                    // Less than 1 turn in 2s means less than 1mph
+                    windMPH = 0
+                    
                 numWindTurnsLast = numWindTurns
+                msWindTurnLast = msWindTurn
             }
         })
 
