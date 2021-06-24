@@ -36,7 +36,7 @@ namespace weatherbit {
     let windMPH = 0
     let directionArrow = [ArrowNames.North,ArrowNames.NorthEast,ArrowNames.East,ArrowNames.SouthEast,ArrowNames.South,ArrowNames.SouthWest,ArrowNames.West,ArrowNames.NorthWest]
     let directionString = ["N","NE","E","SE","S","SW","W","NW"]
-    let simDirection = 42 // an allegal value that simulation can override
+    let simDirection = 360 // an illegal value that simulation can override
 
     // BME280 Addresses
     const bmeAddr = 0x76
@@ -179,16 +179,16 @@ namespace weatherbit {
      * returns the correct arrow name for the index supplied
      */
     //% weight=19 
-    export function directionImageName(directionIndex: number): number {
-        return directionArrow[directionIndex]
+    export function directionArrowName(direction: number): number {
+        return directionArrow[Math.round(direction/45)]
     }
 
     /**
      * returns the correct direction string for the index supplied
      */
     //% weight=18
-    export function directionStringName(directionIndex: number): string {
-        return directionString[directionIndex]
+    export function directionStringName(direction: number): string {
+        return directionString[Math.round(direction/45)]
     }
 
     /**
@@ -247,10 +247,10 @@ namespace weatherbit {
 
     /**
     * Read the wind direction from the wind vane.  
-	* Retuns a string representing the direction (N, E, S, W, NE, NW, SE, SW)
+	* Returns the compass bearing of the wind direction in degrees
     */
-    //% weight=20 blockId="weatherbit_windDirIndex" block="wind direction index"
-    export function windDirectionIndex(): number {
+    //% weight=20 blockId="weatherbit_windDir" block="wind direction"
+    export function windDirection(): number {
         startWindMonitoring();
 
         let windDir = 0
@@ -258,29 +258,21 @@ namespace weatherbit {
         if (windDir < 906 && windDir > 886)
             return 0
         else if (windDir < 712 && windDir > 692)
-            return 1
+            return 45
         else if (windDir < 415 && windDir > 395)
-            return 2
+            return 90
         else if (windDir < 498 && windDir > 478)
-            return 3
+            return 135
         else if (windDir < 584 && windDir > 564)
-            return 4
+            return 180
         else if (windDir < 819 && windDir > 799)
-            return 5
+            return 225
         else if (windDir < 988 && windDir > 968)
-            return 6
+            return 270
         else if (windDir < 959 && windDir > 939)
-            return 7
+            return 315
         else
             return simDirection
-    }
-
-    /**
-     * return the wind direction as a string
-     */
-    //% weight=20 
-    export function windDirection(): string {
-        return directionStringName(windDirectionIndex())
     }
 
     /**
@@ -305,7 +297,7 @@ namespace weatherbit {
                 basic.pause(200)
                 numWindTurns++
                 msWindTurn = control.millis()
-                simDirection = i
+                simDirection = msWindTurn % 360
                 i++
                 if (i > 7){
                     numRainDumps++
