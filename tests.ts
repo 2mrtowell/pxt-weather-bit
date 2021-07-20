@@ -34,4 +34,4 @@ weatherbit.startRainMonitoring()
 weatherbit.startWindMonitoring()
 weatherbit.startWeatherMonitoring()
 
-weatherbit.simWindAndRain()
+weatherbit.simWeather()

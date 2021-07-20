@@ -36,7 +36,7 @@ namespace weatherbit {
     let windMPH = 0
     let directionArrow = [ArrowNames.North,ArrowNames.NorthEast,ArrowNames.East,ArrowNames.SouthEast,ArrowNames.South,ArrowNames.SouthWest,ArrowNames.West,ArrowNames.NorthWest]
     let directionString = ["N","NE","E","SE","S","SW","W","NW"]
-    let simDirection = 360 // an illegal value that simulation can override
+    let simDirection = 0 // North - but simulation will override
 
     // BME280 Addresses
     const bmeAddr = 0x76
@@ -287,10 +287,10 @@ namespace weatherbit {
     }
 	
 /**
-    * Simulate wind turns
+    * Simulate weather - wind and rain
     */
-    //% weight=0 blockId="weatherbit_simWindTurns" block="simulate wind turns"
-    export function simWindAndRain(): void {
+    //% weight=0 blockId="weatherbit_simWeather" block="simulate weather"
+    export function simWeather(): void {
         control.inBackground(() => {
             let i = 0
             while (true){
@@ -577,9 +577,9 @@ namespace weatherbit {
     /**
      * Reads the temperature from the one-wire temperature sensor.
 	 * Returns a 4 digit number. value should be divided by 100 to get 
-	 * temperature in hudnreths of a degree centigrade. 
+	 * temperature in hundreths of a degree centigrade. 
      */
-    //% weight=10 blockId="weahterbit_soilTemp" block="soil temperature(C)"
+    //% weight=10 blockId="weatherbit_soilTemp" block="soil temperature(C)"
     //%
     export function soilTemperature(): number {
         init();
