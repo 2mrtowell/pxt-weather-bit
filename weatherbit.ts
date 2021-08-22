@@ -65,8 +65,16 @@ namespace weatherbit {
     let digH5Val = 0
     let digH6Val = 0
 
-    // Buffer to hold pressure compensation values to pass to the C++ compensation function
-    let digPBuf: Buffer
+    // Stores compensation values for pressure (must be read from BME280 NVM)
+    let digP1Val = 0
+    let digP2Val = 0
+    let digP3Val = 0
+    let digP4Val = 0
+    let digP5Val = 0
+    let digP6Val = 0
+    let digP7Val = 0
+    let digP8Val = 0
+    let digP9Val = 0
 
     // BME Compensation Parameter Addresses for Temperature
     const digT1 = 0x88
@@ -407,12 +415,15 @@ namespace weatherbit {
      */
     //% weight=42 blockGap=8 blockId="pressure" block="pressure"
     export function pressure(): number {
-        // Read the temperature registers
+        // Read the temperature to set tfine for the pressure compensation
+        let temp = temperature()
+
+        // Read the pressure registers
         let pressRegM = readBMEReg(pressMSB, NumberFormat.UInt16BE)
         let pressRegL = readBMEReg(pressXlsb, NumberFormat.UInt8LE)
 
         // Compensate and return pressure
-        return compensatePressure((pressRegM << 4) | (pressRegL >> 4), tFine, digPBuf)
+        return compensatePressure((pressRegM << 4) | (pressRegL >> 4), tFine)
     }
 
     /**
@@ -425,17 +436,10 @@ namespace weatherbit {
         // The 0xE5 register is 8 bits where 4 bits go to one value and 4 bits go to another
         let e5Val = 0
 
-        // Instantiate buffer that holds the pressure compensation values
-        digPBuf = pins.createBuffer(18)
-
         // Set up the BME in weather monitoring mode
-        WriteBMEReg(ctrlHum, 0x01)
-        WriteBMEReg(ctrlMeas, 0x27)
-        WriteBMEReg(config, 0)
-
-        // Read the temperature registers to do a calculation and set tFine
-        let tempRegM = readBMEReg(tempMSB, NumberFormat.UInt16BE)
-        let tempRegL = readBMEReg(tempXlsb, NumberFormat.UInt8LE)
+        WriteBMEReg(ctrlHum, 0x01) //oversample humidty x1
+        WriteBMEReg(ctrlMeas, 0x27) // oversample pressure x1; oversample temperature x1; Normal mode
+        WriteBMEReg(config, 0) //t_sb=0; filter=0; spi3wire=0
 
         // Get the NVM digital compensations numbers from the device for temp
         digT1Val = readBMEReg(digT1, NumberFormat.UInt16LE)
@@ -444,15 +448,15 @@ namespace weatherbit {
 
         // Get the NVM digital compensation number from the device for pressure and pack into
         // a buffer to pass to the C++ implementation of the compensation formula
-        digPBuf.setNumber(NumberFormat.UInt16LE, 0, readBMEReg(digP1, NumberFormat.UInt16LE))
-        digPBuf.setNumber(NumberFormat.Int16LE, 2, readBMEReg(digP2, NumberFormat.Int16LE))
-        digPBuf.setNumber(NumberFormat.Int16LE, 4, readBMEReg(digP3, NumberFormat.Int16LE))
-        digPBuf.setNumber(NumberFormat.Int16LE, 6, readBMEReg(digP4, NumberFormat.Int16LE))
-        digPBuf.setNumber(NumberFormat.Int16LE, 8, readBMEReg(digP5, NumberFormat.Int16LE))
-        digPBuf.setNumber(NumberFormat.Int16LE, 10, readBMEReg(digP6, NumberFormat.Int16LE))
-        digPBuf.setNumber(NumberFormat.Int16LE, 12, readBMEReg(digP7, NumberFormat.Int16LE))
-        digPBuf.setNumber(NumberFormat.Int16LE, 14, readBMEReg(digP8, NumberFormat.Int16LE))
-        digPBuf.setNumber(NumberFormat.Int16LE, 16, readBMEReg(digP9, NumberFormat.Int16LE))
+        digP1Val = readBMEReg(digP1, NumberFormat.UInt16LE)
+        digP2Val = readBMEReg(digP2, NumberFormat.Int16LE)
+        digP3Val = readBMEReg(digP3, NumberFormat.Int16LE)
+        digP4Val = readBMEReg(digP4, NumberFormat.Int16LE)
+        digP5Val = readBMEReg(digP5, NumberFormat.Int16LE)
+        digP6Val = readBMEReg(digP6, NumberFormat.Int16LE)
+        digP7Val = readBMEReg(digP7, NumberFormat.Int16LE)
+        digP8Val = readBMEReg(digP8, NumberFormat.Int16LE)
+        digP9Val = readBMEReg(digP9, NumberFormat.Int16LE)
 
         // Get the NVM digital compensation number from device for humidity
         e5Val = readBMEReg(e5Reg, NumberFormat.Int8LE)
@@ -462,10 +466,6 @@ namespace weatherbit {
         digH4Val = (readBMEReg(e4Reg, NumberFormat.Int8LE) << 4) | (e5Val & 0xf)
         digH5Val = (readBMEReg(e6Reg, NumberFormat.Int8LE) << 4) | (e5Val >> 4)
         digH6Val = readBMEReg(digH6, NumberFormat.Int8LE)
-
-        // Compensate the temperature to calcule the tFine variable for use in other
-        // measurements
-        let temp = compensateTemp((tempRegM << 4) | (tempRegL >> 4))
 
         weatherMonitorStarted = true;
     }
@@ -498,34 +498,30 @@ namespace weatherbit {
     }
 
     /**
-     * Function used for simulator, actual implementation is in weatherbit.cpp
+     * Function used has to be in floating point to work properly
+     * The return value is in pseudo-24.8 integer format as Pa, so divide by 256 to get Pa
+     * and by 25600 to get the normal hPa units (aka millibar)
      */
     //%
-    function compensatePressure(pressRegVal: number, tFine: number, compensation: Buffer) {
-        let digP1: number = (compensation[0] << 8) | compensation[1];
-        let digP2: number = (compensation[2] << 8) | compensation[3];
-        let digP3: number = (compensation[4] << 8) | compensation[5];
-        let digP4: number = (compensation[6] << 8) | compensation[7];
-        let digP5: number = (compensation[8] << 8) | compensation[9];
-        let digP6: number = (compensation[10] << 8) | compensation[11];
-        let digP7: number = (compensation[12] << 8) | compensation[13];
-        let digP8: number = (compensation[14] << 8) | compensation[15];
-        let digP9: number = (compensation[16] << 8) | compensation[17];
+    function compensatePressure(pressRegVal: number, tFine: number) {
 
-        let firstConv: number = tFine - 128000;
-        let secondConv: number = firstConv * firstConv * digP6;
-        secondConv += firstConv * digP5 << 17;
-        secondConv += digP4 << 35;
-        firstConv = ((firstConv * firstConv * digP3) >> 8) + ((firstConv * digP2) << 12);
-        firstConv = ((1 << 47) + firstConv) * (digP1 >> 33);
+        let firstConv: number = tFine/2.0 - 64000.0;
+        let secondConv: number = firstConv * firstConv * (digP6Val/32768.0);
+        secondConv += firstConv * digP5Val * 2.0;
+        secondConv = (secondConv / 4.0) + (digP4Val * 65536.0);
+        let var3 = digP3Val * firstConv*firstConv / 524228.0
+        firstConv = (var3 + digP2Val*firstConv) / 524228.0;
+        firstConv = (1.0 + firstConv/32768.0) * digP1Val;
         if (firstConv == 0) {
-            return 69; //avoid exception caused by divide by 0
+            return 0; //avoid exception caused by divide by 0
         }
-        let pressureReturn = 1048576 - pressRegVal;
-        pressureReturn = (((pressureReturn << 31) - secondConv) * 3125) / firstConv;
-        firstConv = (digP9 * (pressureReturn << 13) * (pressureReturn << 13)) >> 25;
-        secondConv = (digP8 * pressureReturn) >> 19;
-        pressureReturn = ((pressureReturn + firstConv + secondConv) >> 8) + (digP7 << 4);
+        let pressureReturn = 1048576.0 - pressRegVal;
+        pressureReturn = (pressureReturn - (secondConv/4096.0)) * 6250.0 / firstConv;
+
+        let var1 = digP9Val * pressureReturn * pressureReturn / 2147483648.0
+        let var2 = (pressureReturn * digP8Val) / 32768.0;
+        //256 * bigger than the normal floating point return value to keep the same units as the more normal 64 and 32 bit implementations
+        pressureReturn = 256.0 * pressureReturn + 16.0 * (var1 + var2 + digP7Val); 
         return pressureReturn;
     }
 
@@ -539,15 +535,15 @@ namespace weatherbit {
 
         let pressRegM = readBMEReg(pressMSB, NumberFormat.UInt16BE)
         let pressRegL = readBMEReg(pressXlsb, NumberFormat.UInt8LE)
-        return calcAltitude((pressRegM << 4) | (pressRegL >> 4), tFine, digPBuf)
+        return calcAltitude((pressRegM << 4) | (pressRegL >> 4), tFine)
     }
 
     /** 
      * Function used for simulator, actual implementation is in weatherbit.cpp
      */
     //%
-    function calcAltitude(pressRegVal: number, tFine: number, compensation: Buffer): number {
-        let returnValue = compensatePressure(pressRegVal, tFine, compensation);
+    function calcAltitude(pressRegVal: number, tFine: number): number {
+        let returnValue = compensatePressure(pressRegVal, tFine);
         returnValue /= 25600.0;
         returnValue /= 1013.25;
         returnValue = returnValue ** 0.1903;
