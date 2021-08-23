@@ -31,7 +31,7 @@ input.onLogoEvent(TouchButtonEvent.Pressed, () => {
     basic.showArrow(weatherbit.directionArrowName(0))
 })
 basic.showNumber(1)
-serial.redirect(SerialPin.P14, SerialPin.P15, 115200)
+serial.redirect(SerialPin.P15, SerialPin.P14, 115200)
 serial.writeValue("Started",0)
 basic.showNumber(2)
 weatherbit.startRainMonitoring()
