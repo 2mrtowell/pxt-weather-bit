@@ -362,8 +362,12 @@ namespace weatherbit {
 
         // Register event handler for a pin 8 high pulse
         control.onEvent(EventBusSource.MICROBIT_ID_IO_P8, EventBusValue.MICROBIT_PIN_EVT_RISE, () => {
-            numWindTurns++
-            msWindTurn = control.millis()
+            // It seems to give 2 events in quick succession: use timing to debounce
+            let now = control.millis()
+            if ((now-msWindTurn)>10) { //about 150mph to genuinely be this fast
+                numWindTurns++
+                msWindTurn = now
+            }
         })
 
         // Update MPH value every 2 seconds
@@ -371,7 +375,8 @@ namespace weatherbit {
             while (true) {
                 basic.pause(2000)
 		        if ((numWindTurns >= numWindTurnsLast) && (msWindTurn > msWindTurnLast)) // take care with wrap-around
-                    windMPH = (1000 * (numWindTurns - numWindTurnsLast) / (msWindTurn - msWindTurnLast)) / (1492 / 1000)
+                    // Datasheet says 1 closure per second is 1.492 MPH
+                    windMPH = (1492 * (numWindTurns - numWindTurnsLast)) / (msWindTurn - msWindTurnLast)
                 else if (numWindTurns == numWindTurnsLast)
                     // Less than 1 turn in 2s means less than 1mph
                     windMPH = 0
