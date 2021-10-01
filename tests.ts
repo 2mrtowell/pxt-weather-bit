@@ -43,9 +43,11 @@ if (weatherbit.windDirection() == 0) {
     weatherbit.simWeather()
 }
 basic.showNumber(0)
-loops.everyInterval(500, () => {
-    let dir = weatherbit.windDirection()
-    serial.writeValue("D", dir)
-    serial.writeLine(weatherbit.directionString(dir))
-    basic.showArrow(weatherbit.directionArrowName(dir))
+loops.everyInterval(1000, () => {
+    //let dir = weatherbit.windDirection()
+    //serial.writeValue("D", dir)
+    //serial.writeLine(weatherbit.directionString(dir))
+    //basic.showArrow(weatherbit.directionArrowName(dir))
+    serial.writeValue("rain", weatherbit.rain())
+    serial.writeValue("rainRate", weatherbit.rainRate())
     })

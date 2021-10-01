@@ -186,7 +186,7 @@ namespace weatherbit {
     /**
      * returns the correct arrow name for the index supplied
      */
-    //% weight=19 
+    //% weight=19  blockId="weatherbit_directionArrow" block="wind direction arrow"
     export function directionArrowName(direction: number): number {
         return directionArrow[Math.round(direction/45)]
     }
@@ -194,34 +194,34 @@ namespace weatherbit {
     /**
      * returns the correct direction string for the index supplied
      */
-    //% weight=18
+    //% weight=18 blockId="weatherbit_directionString" block="wind direction string"
     export function directionString(direction: number): string {
         return directionStringArray[Math.round(direction/22.5)]
     }
 
     /**
-    * Reads the number of times the rain gauge has filled and emptied
-	* Returns 0.1mm of rain. 
+    * Reads the rain gauge count of the number of times the bucket has filled and emptied
+	* Returns cumulative mm of rain. 
     */
     //% weight=34 blockId="weatherbit_rain" block="rain"
     export function rain(): number {
         startRainMonitoring();
-        let tenthsOfMmOfRain = ((numRainDumps * 2794) / 1000)
-        return tenthsOfMmOfRain
+        let mmOfRain = numRainDumps * 0.2794
+        return mmOfRain
     }
 	
     /**
-	* Returns the rate of rainfall in 0.1mm/hour based on the last time to fill the bucket
+	* Returns the rate of rainfall in mm/hour based on the last time to fill the bucket
     */
     //% weight=35 blockId="weatherbit_rainRate" block="rain rate"
     export function rainRate(): number {
-	startRainMonitoring();
-	if (msRainDump == 0)
-	    return 0
-	else if (control.millis() - msRainDumpLast > msRainDump) // rate estimate decays over time if no more dumps when rain stops
-            return 2794 * 3600 / (control.millis() - msRainDumpLast)
-	else
-            return 2794 * 3600 / msRainDump
+	    startRainMonitoring();
+        if (msRainDump == 0)
+            return 0
+        else if (control.millis() - msRainDumpLast > msRainDump) // rate estimate decays over time if no more dumps when rain stops
+                return 279.4 * 3600 / (control.millis() - msRainDumpLast)
+        else
+                return 279.4 * 3600 / msRainDump
     }
 	
     /**
@@ -244,9 +244,14 @@ namespace weatherbit {
 
         // Register event handler for a pin 2 high pulse
         control.onEvent(EventBusSource.MICROBIT_ID_IO_P2, EventBusValue.MICROBIT_PIN_EVT_RISE, () => {
-            numRainDumps++
-            msRainDump = control.millis() - msRainDumpLast
-            msRainDumpLast = control.millis()
+            // The rain sensor seems to raise 3 events in quick succession for every tip
+            // filter these out based on time.
+            let gap = control.millis() - msRainDumpLast
+            if (gap>1000) {
+                numRainDumps++
+                msRainDump = gap
+                msRainDumpLast = control.millis()
+            }
         })
 
         // only init once
@@ -311,10 +316,10 @@ namespace weatherbit {
         return windMPH
     }
 	
-/**
+    /**
     * Simulate weather - wind and rain
     */
-    //% weight=0 blockId="weatherbit_simWeather" block="simulate weather"
+    //% weight=10 blockId="weatherbit_simWeather" block="simulate weather"
     export function simWeather(): void {
         control.inBackground(() => {
             let i = 0
