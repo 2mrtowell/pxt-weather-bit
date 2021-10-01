@@ -35,8 +35,8 @@ namespace weatherbit {
     let msWindTurnLast = 0
     let windMPH = 0
     let directionArrow = [ArrowNames.North,ArrowNames.NorthEast,ArrowNames.East,ArrowNames.SouthEast,ArrowNames.South,ArrowNames.SouthWest,ArrowNames.West,ArrowNames.NorthWest]
-    let directionString = ["N","NE","E","SE","S","SW","W","NW"]
-    let simDirection = 0 // North - but simulation will override
+    let directionStringArray = ["N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW"]
+    let simDirection = 180 // South - but simulation will override
 
     // BME280 Addresses
     const bmeAddr = 0x76
@@ -195,8 +195,8 @@ namespace weatherbit {
      * returns the correct direction string for the index supplied
      */
     //% weight=18
-    export function directionStringName(direction: number): string {
-        return directionString[Math.round(direction/45)]
+    export function directionString(direction: number): string {
+        return directionStringArray[Math.round(direction/22.5)]
     }
 
     /**
@@ -263,22 +263,39 @@ namespace weatherbit {
 
         let windDir = 0
         windDir = pins.analogReadPin(AnalogPin.P1)
-        if (windDir < 906 && windDir > 886)
+
+        if (windDir < 911 && windDir > 894)
             return 0
-        else if (windDir < 712 && windDir > 692)
+        else if (windDir < 670 && windDir > 653)
+            return 22.5
+        else if (windDir < 709 && windDir > 692)
             return 45
-        else if (windDir < 415 && windDir > 395)
+        else if (windDir < 395 && windDir > 382)
+            return 67.5
+        else if (windDir < 408 && windDir > 394)
             return 90
-        else if (windDir < 498 && windDir > 478)
+        else if (windDir < 381 && windDir > 364)
+            return 112.5
+        else if (windDir < 492 && windDir > 475)
             return 135
+        else if (windDir < 439 && windDir > 422)
+            return 157.5
         else if (windDir < 584 && windDir > 564)
             return 180
-        else if (windDir < 819 && windDir > 799)
+        else if (windDir < 543 && windDir > 526)
+            return 202.5
+        else if (windDir < 820 && windDir > 803)
             return 225
-        else if (windDir < 988 && windDir > 968)
+        else if (windDir < 801 && windDir > 784)
+            return 247.5
+        else if (windDir < 994 && windDir > 977)
             return 270
-        else if (windDir < 959 && windDir > 939)
+        else if (windDir < 933 && windDir > 916)
+            return 292.5
+        else if (windDir < 964 && windDir > 947)
             return 315
+        else if (windDir < 864 && windDir > 847)
+            return 337.5
         else
             return simDirection
     }

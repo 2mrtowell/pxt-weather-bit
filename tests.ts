@@ -20,7 +20,7 @@ input.onButtonPressed(Button.B, () => {
     basic.showNumber(weatherbit.windSpeed())
     serial.writeValue("wind speed", weatherbit.windSpeed())
     basic.showNumber(dir)
-    basic.showString(weatherbit.directionStringName(dir))
+    basic.showString(weatherbit.directionString(dir))
     basic.showArrow(weatherbit.directionArrowName(dir))
     basic.pause(300)
     basic.showNumber(weatherbit.rain())
@@ -38,5 +38,14 @@ weatherbit.startRainMonitoring()
 weatherbit.startWindMonitoring()
 weatherbit.startWeatherMonitoring()
 
-weatherbit.simWeather()
+if (weatherbit.windDirection() == 0) {
+    serial.writeValue("Simulation started",0)
+    weatherbit.simWeather()
+}
 basic.showNumber(0)
+loops.everyInterval(500, () => {
+    let dir = weatherbit.windDirection()
+    serial.writeValue("D", dir)
+    serial.writeLine(weatherbit.directionString(dir))
+    basic.showArrow(weatherbit.directionArrowName(dir))
+    })
