@@ -585,14 +585,16 @@ namespace weatherbit {
     
     /**
      * Reads the Sunlight level from the same ADC as the soil moisture
-     * Returns a value between 0 and 1023. 0 being dark and 1023 being blazing sunshine.
-     * Assuming a solar cell 50mmx38mm driving into a 32 ohm load
-     * Power = L^2 * 3^2 / (1024^2 * 0.05 * 0.038 * 32) = L^2 / 7084 W/m^2
+     * Returns a (floating point) power value in W/m^2.
      */
     //% weight=11 blockGap=8 blockId="weatherbit_sunlight" block="sunlight"
     export function sunlight(): number {
         let light = pins.analogReadPin(AnalogPin.P0)
-        return light * light / 7084       // units of W/m^2
+        /* The analogue value read is between 0 and 1023 for voltages 0 to 3.3V.
+         * Assuming a solar cell 50mmx38mm driving into a 32 ohm load
+         * Power = L^2 * 3.3^2 / (1023^2 * 0.05 * 0.038 * 32) = L^2 / 5843 W/m^2
+         */
+        return light * light / 5843       // units of W/m^2
     }
 
     /**
