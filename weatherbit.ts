@@ -581,11 +581,23 @@ namespace weatherbit {
 
 
     // Functions for interfacing with the soil moisture and soil temperature (aquaponics)
-
+    // but we have stolen the soil moisture ADC to read the power from a solar cell into a resistive load.
+    
+    /**
+     * Reads the Sunlight level from the same ADC as the soil moisture
+     * Returns a value between 0 and 1023. 0 being dark and 1023 being blazing sunshine.
+     * Assuming a solar cell 50mmx38mm driving into a 32 ohm load
+     * Power = L^2 * 3^2 / (1024^2 * 0.05 * 0.038 * 32) = L^2 / 7084 W/m^2
+     */
+    //% weight=11 blockGap=8 blockId="weatherbit_sunlight" block="sunlight"
+    export function sunlight(): number {
+        let light = pins.analogReadPin(AnalogPin.P0)
+        return light * light / 7084       // units of W/m^2
+    }
 
     /**
      * Reads the Moisture Level from the Soil Moisture Sensor.
-	 * Returns a value between 0 and 1023. 0 being dry and 1023 being wet.     
+	 * Returns a value between 0 and 1023. 0 being dry and 1023 being wet.
      */
     //% weight=11 blockGap=8 blockId="weatherbit_soilMoisture" block="soil moisture"
     export function soilMoisture(): number {

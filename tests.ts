@@ -50,5 +50,6 @@ loops.everyInterval(1000, () => {
     //basic.showArrow(weatherbit.directionArrowName(dir))
     //serial.writeValue("rain", weatherbit.rain())
     //serial.writeValue("rainRate", weatherbit.rainRate())
-    serial.writeValue("wind", weatherbit.windSpeed())
-    })
+    serial.writeValue("Sunlight", weatherbit.sunlight())
+    basic.showNumber(weatherbit.sunlight())
+})
