@@ -1,6 +1,6 @@
 {
     "name": "weatherbit",
-    "version": "0.0.28",
+    "version": "0.0.29",
     "description": "littlebriars weatherbit",
     "license": "MIT",
     "dependencies": {
