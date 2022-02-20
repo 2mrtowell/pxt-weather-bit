@@ -40,6 +40,7 @@ namespace weatherbit {
 
     // BME280 Addresses
     const bmeAddr = 0x76
+    const bmeId = 0xD0
     const ctrlHum = 0xF2
     const ctrlMeas = 0xF4
     const config = 0xF5
@@ -460,6 +461,17 @@ namespace weatherbit {
     export function startWeatherMonitoring(): void {
         if (weatherMonitorStarted) return;
 
+        //Check if there is a BME attached - and simulate weather if not
+        let id = readBMEReg(bmeId,NumberFormat.UInt8LE)
+        if (id==0) {
+            basic.showString("SIM!")
+            simWeather()
+        }
+        else {
+            basic.showString("ID=")
+            basic.showNumber(id)
+        }
+        
         // The 0xE5 register is 8 bits where 4 bits go to one value and 4 bits go to another
         let e5Val = 0
 
