@@ -263,12 +263,19 @@ namespace weatherbit {
     * Read the wind direction from the wind vane.  
 	* Returns the compass bearing of the wind direction in degrees
     */
+    let windDirLast = 9999
     //% weight=20 blockId="weatherbit_windDir" block="wind direction"
     export function windDirection(): number {
         startWindMonitoring();
 
+        /* read until reading stable */
         let windDir = 0
         windDir = pins.analogReadPin(AnalogPin.P1)
+        while (Math.abs(windDir-windDirLast)>10) { /* 10 is an arbitary number based on guess and observation */
+            windDirLast = windDir
+            windDir = pins.analogReadPin(AnalogPin.P1)
+        }
+
 
         if (windDir < 911 && windDir > 894)
             return 0
