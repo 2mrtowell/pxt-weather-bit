@@ -263,54 +263,61 @@ namespace weatherbit {
     * Read the wind direction from the wind vane.  
 	* Returns the compass bearing of the wind direction in degrees
     */
-    let windDirLast = 9999
+   let windDir = 0
+   let windDirLast = 9999
     //% weight=20 blockId="weatherbit_windDir" block="wind direction"
     export function windDirection(): number {
         startWindMonitoring();
 
-        /* read until reading stable */
-        let windDir = 0
+        /* read up to 10 times until reading stable-ish */
         windDir = pins.analogReadPin(AnalogPin.P1)
-        while (Math.abs(windDir-windDirLast)>10) { /* 10 is an arbitary number based on guess and observation */
+        for (let i = 0; i < 10; i++) {
+            if (Math.abs(windDirLast-windDir)<5)
+                break;
             windDirLast = windDir
             windDir = pins.analogReadPin(AnalogPin.P1)
         }
+        windDirLast = windDir
 
-
-        if (windDir < 911 && windDir > 894)
+        if (windDir <= 913 && windDir > 879)
             return 0
-        else if (windDir < 670 && windDir > 653)
+        else if (windDir <= 681 && windDir > 616)
             return 22.5
-        else if (windDir < 709 && windDir > 692)
+        else if (windDir <= 746 && windDir > 681)
             return 45
-        else if (windDir < 395 && windDir > 382)
+        else if (windDir <= 395 && windDir > 382)
             return 67.5
-        else if (windDir < 408 && windDir > 394)
+        else if (windDir <= 415 && windDir > 395)
             return 90
-        else if (windDir < 381 && windDir > 364)
+        else if (windDir <= 381 && windDir > 364)
             return 112.5
-        else if (windDir < 492 && windDir > 475)
+        else if (windDir <= 509 && windDir > 457)
             return 135
-        else if (windDir < 439 && windDir > 422)
+        else if (windDir <= 457 && windDir > 415)
             return 157.5
-        else if (windDir < 584 && windDir > 564)
+        else if (windDir <= 615 && windDir > 552)
             return 180
-        else if (windDir < 543 && windDir > 526)
+        else if (windDir <= 552 && windDir > 509)
             return 202.5
-        else if (windDir < 820 && windDir > 803)
+        else if (windDir <= 833 && windDir > 802)
             return 225
-        else if (windDir < 801 && windDir > 784)
+        else if (windDir <= 802 && windDir > 747)
             return 247.5
-        else if (windDir < 994 && windDir > 977)
+        else if (windDir <= 994 && windDir > 971)
             return 270
-        else if (windDir < 933 && windDir > 916)
+        else if (windDir <= 940 && windDir > 914)
             return 292.5
-        else if (windDir < 964 && windDir > 947)
+        else if (windDir <= 970 && windDir > 940)
             return 315
-        else if (windDir < 864 && windDir > 847)
+        else if (windDir <= 879 && windDir > 834)
             return 337.5
         else
             return simDirection
+    }
+    
+    //% weight=20 blockId="weatherbit_windDirRaw" block="wind direction (raw)"
+    export function windDirectionRaw(): number {
+        return windDir
     }
 
     /**
