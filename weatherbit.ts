@@ -481,10 +481,6 @@ namespace weatherbit {
             basic.showString("SIM!")
             simWeather()
         }
-        else {
-            basic.showString("ID=")
-            basic.showNumber(id)
-        }
         
         // The 0xE5 register is 8 bits where 4 bits go to one value and 4 bits go to another
         let e5Val = 0
