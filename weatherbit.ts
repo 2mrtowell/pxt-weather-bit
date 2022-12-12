@@ -487,7 +487,8 @@ namespace weatherbit {
 
         // Set up the BME in weather monitoring mode
         WriteBMEReg(ctrlHum, 0x01) //oversample humidty x1
-        WriteBMEReg(ctrlMeas, 0x27) // oversample pressure x1; oversample temperature x1; Normal mode
+    //   WriteBMEReg(ctrlMeas, 0x27) // oversample pressure x1; oversample temperature x1; Normal mode
+        WriteBMEReg(ctrlMeas, 0xB7) // oversample x16; Normal mode
         WriteBMEReg(config, 0) //t_sb=0; filter=0; spi3wire=0
 
         // Get the NVM digital compensations numbers from the device for temp
